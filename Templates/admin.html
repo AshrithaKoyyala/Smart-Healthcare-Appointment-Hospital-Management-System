@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Executive Administration Control Deck{% endblock %}
+
+{% block navigation %}
+<div class="sidebar" style="background: #0f172a;">
+    <h2>Admin Console</h2>
+    <a href="/dashboard?tab=home" class="{% if active_tab == 'home' %}active{% endif %}">📊 System Metrics & Analytics</a>
+    <a href="/dashboard?tab=staff" class="{% if active_tab == 'staff' %}active{% endif %}">👨‍⚕️ Staff Management Hub</a>
+    <a href="/logout" style="margin-top: auto; background: #dc2626; color: white; text-align: center;">Log Out</a>
+</div>
+{% endblock %}
+
+{% block content %}
+    {% if active_tab == 'home' %}
+        <div class="metric-cards-row">
+            <div class="metric-card" style="border-top-color: #38bdf8;"><h3>Total Patients</h3><p>{{ patients_count }}</p></div>
+            <div class="metric-card" style="border-top-color: #a855f7;"><h3>Total Active Doctors</h3><p>{{ doctors_count }}</p></div>
+            <div class="metric-card" style="border-top-color: #10b981;"><h3>Total Appointments</h3><p>{{ appt_count }}</p></div>
+            <div class="metric-card" style="border-top-color: #f59e0b;"><h3>Dispatched Rx Logs</h3><p>{{ rx_count }}</p></div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 32px;">
+            <div style="background: white; padding: 24px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+                <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 20px; color:#475569;">Top Formulated Compounds Volume Share</h3>
+                {% for med in med_metrics %}
+                    <div style="margin-bottom: 16px;">
+                        <div style="display:flex; justify-content:space-between; font-size:14px; margin-bottom:6px;">
+                            <span>Compound Name: <strong>{{ med.medication_name }}</strong></span>
+                            <strong>{{ med.count }} Filled</strong>
+                        </div>
+                        <div style="width:100%; background:#e2e8f0; height:8px; border-radius:4px; overflow:hidden;">
+                            <div style="width: 80%; background:#38bdf8; height:100%;"></div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div style="background: white; padding: 24px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+                <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 20px; color:#475569;">Encounter Operations Status Tracking</h3>
+                {% for status in status_metrics %}
+                    <div style="margin-bottom: 16px;">
+                        <div style="display:flex; justify-content:space-between; font-size:14px; margin-bottom:6px;">
+                            <span>Classification Status: <strong>{{ status.status }}</strong></span>
+                            <strong>{{ status.count }} Logs</strong>
+                        </div>
+                        <div style="width:100%; background:#e2e8f0; height:8px; border-radius:4px; overflow:hidden;">
+                            <div style="width: 60%; background:#10b981; height:100%;"></div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+    {% elif active_tab == 'staff' %}
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 32px;">
+            <div style="background: white; padding: 32px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+                <h3 style="margin-bottom: 24px; font-size: 18px; font-weight: 700;">Provision New Staff Account</h3>
+                <form action="/admin/add-doctor" method="POST">
+                    <div style="margin-bottom: 16px;">
+                        <label style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;">Doctor Full Name</label>
+                        <input type="text" name="full_name" required placeholder="Dr. Jane Smith" style="width:100%; padding:12px; border:1px solid #cbd5e1; border-radius:8px;">
+                    </div>
+                    <div style="margin-bottom: 16px;">
+                        <label style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;">Corporate Email Profile Link</label>
+                        <input type="email" name="email" required placeholder="smith2026@hospital.com" style="width:100%; padding:12px; border:1px solid #cbd5e1; border-radius:8px;">
+                    </div>
+                    <div style="margin-bottom: 16px;">
+                        <label style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;">Temporary Passcode Key</label>
+                        <input type="password" name="password" required placeholder="••••••••" style="width:100%; padding:12px; border:1px solid #cbd5e1; border-radius:8px;">
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+                        <div>
+                            <label style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;">Specialty Group</label>
+                            <input type="text" name="specialization" required placeholder="e.g. Pathology" style="width:100%; padding:12px; border:1px solid #cbd5e1; border-radius:8px;">
+                        </div>
+                        <div>
+                            <label style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;">Fee Rates ($)</label>
+                            <input type="number" name="fee" required placeholder="150" style="width:100%; padding:12px; border:1px solid #cbd5e1; border-radius:8px;">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-primary" style="width: 100%; background: #0f172a;">Generate Practitioner Credentials</button>
+                </form>
+            </div>
+
+            <div>
+                <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px;">Active Medical Practitioner Roster</h3>
+                <table>
+                    <tr><th>Name Reference</th><th>Link Identity Email</th><th>Specialty Unit</th><th>Consultation Charge</th></tr>
+                    {% for doc in admin_doctors %}
+                        <tr><td><strong>{{ doc.full_name }}</strong></td><td>{{ doc.email }}</td><td>{{ doc.specialization }}</td><td>${{ doc.consultation_fee }} USD</td></tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

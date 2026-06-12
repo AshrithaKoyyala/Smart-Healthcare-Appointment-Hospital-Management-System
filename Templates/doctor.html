@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Medical Practitioner Console{% endblock %}
+
+{% block navigation %}
+<div class="sidebar" style="background: #1e3a8a;">
+    <h2>Staff Portal</h2>
+    <a href="/dashboard?tab=home" class="{% if active_tab == 'home' %}active{% endif %}">📅 Assigned Schedule</a>
+    <a href="/dashboard?tab=prescribe" class="{% if active_tab == 'prescribe' %}active{% endif %}">💊 Issue Prescription</a>
+    <a href="/dashboard?tab=records" class="{% if active_tab == 'records' %}active{% endif %}">📁 Upload Clinical Charts</a>
+    <a href="/logout" style="margin-top: auto; background: #dc2626; color: white; text-align: center;">Log Out</a>
+</div>
+{% endblock %}
+
+{% block content %}
+    {% if active_tab == 'home' %}
+        <div class="metric-cards-row">
+            <div class="metric-card" style="border-top-color: #1e3a8a;"><h3>Active Linked Cases</h3><p>{{ patients|length }}</p></div>
+            <div class="metric-card" style="border-top-color: #10b981;"><h3>Total Assigned Encounters</h3><p>{{ appointments|length }}</p></div>
+        </div>
+        <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 12px;">Active Shift Ingestion Manifest</h3>
+        <table>
+            <tr><th>Patient Identity</th><th>Scheduled Date</th><th>Target Time Window</th><th>Status Frame</th></tr>
+            {% for appt in appointments %}
+                <tr><td><strong>{{ appt.patient_name }}</strong></td><td>{{ appt.appointment_date }}</td><td>{{ appt.appointment_time }}</td><td><span style="color:#10b981; font-weight:bold;">{{ appt.status }}</span></td></tr>
+            {% endfor %}
+        </table>
+
+    {% elif active_tab == 'prescribe' %}
+        <div style="background: white; padding: 32px; border-radius: 12px; max-width: 600px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+            <h3 style="margin-bottom: 24px; font-size: 18px; font-weight: 700;">Issue New Clinical Formulations Channel</h3>
+            <form action="/issue-prescription" method="POST">
+                <div style="margin-bottom: 16px;">
+                    <label style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;">Select Assigned Patient</label>
+                    <select name="patient_id" style="width:100%; padding:12px; border:1px solid #cbd5e1; border-radius:8px;">
+                        {% for pt in patients %}
+                            <option value="{{ pt.id }}">{{ pt.full_name }} (ID: #{{ pt.id }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div style="margin-bottom: 16px;">
+                    <label style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;">Medication Compound Brand</label>
+                    <input type="text" name="medication_name" required placeholder="e.g. Metformin 500mg" style="width:100%; padding:12px; border:1px solid #cbd5e1; border-radius:8px;">
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+                    <div>
+                        <label style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;">Dosage Metric</label>
+                        <input type="text" name="dosage" required placeholder="e.g. 1 Tablet" style="width:100%; padding:12px; border:1px solid #cbd5e1; border-radius:8px;">
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;">Frequency Allocation</label>
+                        <input type="text" name="frequency" required placeholder="e.g. Post Breakfast" style="width:100%; padding:12px; border:1px solid #cbd5e1; border-radius:8px;">
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary" style="width: 100%; background: #16a34a;">Authorize & Dispatch Prescription</button>
+            </form>
+        </div>
+
+    {% elif active_tab == 'records' %}
+        <div style="background: white; padding: 32px; border-radius: 12px; max-width: 600px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+            <h3 style="margin-bottom: 24px; font-size: 18px; font-weight: 700;">File Structural Electronic Diagnostic Charts</h3>
+            <form action="/upload-record" method="POST">
+                <div style="margin-bottom: 16px;">
+                    <label style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;">Target Patient Account</label>
+                    <select name="patient_id" style="width:100%; padding:12px; border:1px solid #cbd5e1; border-radius:8px;">
+                        {% for pt in patients %}
+                            <option value="{{ pt.id }}">{{ pt.full_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div style="margin-bottom: 16px;">
+                    <label style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;">Artifact Report Name</label>
+                    <input type="text" name="document_name" required placeholder="e.g. Echocardiogram Report Summary.pdf" style="width:100%; padding:12px; border:1px solid #cbd5e1; border-radius:8px;">
+                </div>
+                <div style="margin-bottom: 24px;">
+                    <label style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;">Clinical Department Classification</label>
+                    <input type="text" name="department" required placeholder="e.g. Cardiology" style="width:100%; padding:12px; border:1px solid #cbd5e1; border-radius:8px;">
+                </div>
+                <button type="submit" class="btn-primary" style="width: 100%; background: #1e3a8a;">Commit Record to Patient File</button>
+            </form>
+        </div>
+    {% endif %}
+{% endblock %}

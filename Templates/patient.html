@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Patient Dashboard{% endblock %}
+
+{% block navigation %}
+<div class="sidebar">
+    <h2>SmartCare Hub</h2>
+    <a href="/dashboard?tab=home" class="{% if active_tab == 'home' %}active{% endif %}">🏠 Dashboard Home</a>
+    <a href="/dashboard?tab=booking" class="{% if active_tab == 'booking' %}active{% endif %}">📅 Book Appointment</a>
+    <a href="/dashboard?tab=prescriptions" class="{% if active_tab == 'prescriptions' %}active{% endif %}">💊 My Prescriptions</a>
+    <a href="/dashboard?tab=records" class="{% if active_tab == 'records' %}active{% endif %}">📁 Medical Records</a>
+    <a href="/dashboard?tab=notifications" class="{% if active_tab == 'notifications' %}active{% endif %}">
+        🔔 Alerts 
+        {% if unread_count > 0 %}<span class="alert-badge">{{ unread_count }}</span>{% endif %}
+    </a>
+    <a href="/logout" style="margin-top: auto; background: #dc2626; color: white; text-align: center;">Log Out</a>
+</div>
+{% endblock %}
+
+{% block content %}
+    {% if active_tab == 'home' %}
+        <div class="metric-cards-row">
+            <div class="metric-card" style="border-top-color: #2563eb;"><h3>Scheduled Bookings</h3><p>{{ appointments|length }}</p></div>
+            <div class="metric-card" style="border-top-color: #16a34a;"><h3>Active Prescriptions</h3><p>{{ prescriptions|length }}</p></div>
+            <div class="metric-card" style="border-top-color: #ea580c;"><h3>System Alerts</h3><p>{{ unread_count }}</p></div>
+        </div>
+        <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 12px;">Immediate Upcoming Appointments</h3>
+        <table>
+            <tr><th>Encounter ID</th><th>Assigned Specialist</th><th>Specialty</th><th>Schedule Date</th><th>Time Slot</th><th>Status</th></tr>
+            {% for appt in appointments %}
+                <tr><td>#ENC-00{{ appt.id }}</td><td>{{ appt.counterpart }}</td><td>{{ appt.specialization }}</td><td>{{ appt.appointment_date }}</td><td>{{ appt.appointment_time }}</td><td><strong style="color: #2563eb;">{{ appt.status }}</strong></td></tr>
+            {% endfor %}
+        </table>
+
+    {% elif active_tab == 'booking' %}
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 32px;">
+            <div style="background: white; padding: 32px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+                <h3 style="margin-bottom: 24px; font-size: 18px; font-weight: 700;">Secure New Reservation</h3>
+                <form action="/book-appointment" method="POST">
+                    <div style="margin-bottom: 16px;">
+                        <label style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;">Select Practicing Specialist</label>
+                        <select name="doctor_id" style="width:100%; padding:12px; border:1px solid #cbd5e1; border-radius:8px;">
+                            {% for doc in doctors %}
+                                <option value="{{ doc.id }}">{{ doc.full_name }} ({{ doc.specialization }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div style="margin-bottom: 16px;">
+                        <label style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;">Target Date</label>
+                        <input type="date" name="appt_date" required style="width:100%; padding:12px; border:1px solid #cbd5e1; border-radius:8px;">
+                    </div>
+                    <div style="margin-bottom: 24px;">
+                        <label style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;">Preferred Time Slot</label>
+                        <input type="time" name="appt_time" required style="width:100%; padding:12px; border:1px solid #cbd5e1; border-radius:8px;">
+                    </div>
+                    <button type="submit" class="btn-primary" style="width: 100%;">Commit Booking</button>
+                </form>
+            </div>
+            <div>
+                <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px;">Active Medical Practitioner Registry</h3>
+                <table>
+                    <tr><th>Specialist Name</th><th>Department Specialty</th><th>Consultation Fee</th></tr>
+                    {% for doc in doctors %}
+                        <tr><td><strong>{{ doc.full_name }}</strong></td><td>{{ doc.specialization }}</td><td>${{ doc.consultation_fee }} USD</td></tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+
+    {% elif active_tab == 'prescriptions' %}
+        <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 12px;">Active Medical Formulations Log</h3>
+        <table>
+            <tr><th>Medication Compound</th><th>Dosage Form</th><th>Frequency Parameters</th><th>Prescribing Doctor</th><th>Authorization Date</th></tr>
+            {% for rx in prescriptions %}
+                <tr><td><strong>{{ rx.medication_name }}</strong></td><td>{{ rx.dosage }}</td><td>{{ rx.frequency }}</td><td>{{ rx.doctor }}</td><td>{{ rx.issued_date }}</td></tr>
+            {% endfor %}
+        </table>
+
+    {% elif active_tab == 'records' %}
+        <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 12px;">Verified Electronic Health Archive</h3>
+        <table>
+            <tr><th>Record ID</th><th>File Artifact Name</th><th>Diagnostic Specialty Group</th><th>Validation Date</th><th>Attending Clinician</th></tr>
+            {% for record in records %}
+                <tr><td>#EHR-00{{ record.id }}</td><td style="color:#2563eb; font-weight:500;">📁 {{ record.document_name }}</td><td>{{ record.department }}</td><td>{{ record.upload_date }}</td><td>{{ record.doctor }}</td></tr>
+            {% endfor %}
+        </table>
+
+    {% elif active_tab == 'notifications' %}
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h3 style="font-size: 18px; font-weight: 700;">Centralized Dispatch System Notifications</h3>
+            <a href="/notifications/clear" class="btn-primary" style="background:#475569; font-size:14px; padding:8px 16px;">Flush Unread Signals</a>
+        </div>
+        {% for alert in alerts %}
+            {% if alert.is_unread %}
+                <div style="background: #eff6ff; padding: 20px; border-radius: 8px; border-left: 4px solid #2563eb; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                    <div style="font-size: 15px; color: #1e293b; font-weight: 600;">{{ alert.message }}</div>
+                    <div style="font-size: 12px; color: #64748b; margin-top: 6px;">Logged Timestamp: {{ alert.created_at }}</div>
+                </div>
+            {% else %}
+                <div style="background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #cbd5e1; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                    <div style="font-size: 15px; color: #1e293b; font-weight: 400;">{{ alert.message }}</div>
+                    <div style="font-size: 12px; color: #64748b; margin-top: 6px;">Logged Timestamp: {{ alert.created_at }}</div>
+                </div>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+{% endblock %}

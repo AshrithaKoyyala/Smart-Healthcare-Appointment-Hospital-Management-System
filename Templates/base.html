@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartCare Enterprise Architecture</title>
+    <style>
+        * { box-sizing: border-box; font-family: 'Inter', -apple-system, sans-serif; margin: 0; padding: 0; }
+        body { background: #f8fafc; display: flex; height: 100vh; overflow: hidden; color: #1e293b; }
+        .app-container { display: flex; width: 100%; height: 100%; }
+        .sidebar { width: 280px; background: #0f172a; color: white; padding: 24px; display: flex; flex-direction: column; }
+        .sidebar h2 { font-size: 22px; font-weight: 800; color: #38bdf8; margin-bottom: 32px; letter-spacing: -0.5px; }
+        .sidebar a { color: #94a3b8; text-decoration: none; padding: 12px 16px; margin: 4px 0; border-radius: 8px; display: block; font-weight: 500; transition: all 0.2s; }
+        .sidebar a:hover, .sidebar a.active { background: #1e293b; color: white; }
+        .sidebar a.active { border-left: 4px solid #38bdf8; background: #1e293b; }
+        .main-workspace { flex: 1; display: flex; flex-direction: column; background: #f1f5f9; }
+        .top-masthead { background: white; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; }
+        .workspace-content { padding: 40px; overflow-y: auto; flex: 1; }
+        .metric-cards-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; margin-bottom: 32px; }
+        .metric-card { background: white; padding: 24px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border-top: 4px solid #3b82f6; }
+        .metric-card h3 { font-size: 13px; font-weight: 600; color: #64748b; text-transform: uppercase; }
+        .metric-card p { font-size: 28px; font-weight: 700; color: #0f172a; margin-top: 8px; }
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-top: 16px; }
+        th, td { padding: 16px 24px; text-align: left; border-bottom: 1px solid #f1f5f9; }
+        th { background: #f8fafc; color: #475569; font-weight: 600; font-size: 14px; }
+        td { font-size: 15px; color: #334155; }
+        .btn-primary { background: #2563eb; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block; }
+        .btn-primary:hover { background: #1d4ed8; }
+        .alert-badge { background: #ef4444; color: white; padding: 2px 8px; border-radius: 20px; font-size: 12px; font-weight: bold; float: right; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        {% block navigation %}{% endblock %}
+        <div class="main-workspace">
+            <div class="top-masthead">
+                <h2>{% block title %}{% endblock %}</h2>
+                <div style="font-size: 15px; color: #475569;">
+                    Operator: <strong style="color: #0f172a;">{{ session['user_name'] }}</strong> 
+                    <span style="background: #e2e8f0; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: bold; margin-left: 8px;">{{ session['user_role'] }}</span>
+                </div>
+            </div>
+            <div class="workspace-content">
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>
